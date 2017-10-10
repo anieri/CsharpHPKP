@@ -37,6 +37,19 @@ namespace CSharpHPKP {
             return Header.populate(new Header(), pins[0]);
         }
 
+        public static Header Copy(Header h) {
+            Header r = new Header();
+            r.Created = h.Created;
+            r.MaxAge = h.MaxAge;
+            r.IncludeSubDomains = h.IncludeSubDomains;
+            r.Permanent = h.Permanent;
+            r.ReportURI = h.ReportURI;
+            r.Sha256Pins = new List<string>();
+            foreach (var pin in h.Sha256Pins) {
+                r.Sha256Pins.Add(pin);
+            }
+            return r;
+        }
 
         private static Header populate(Header h, string v) {
             h.Sha256Pins = new List<string>();
