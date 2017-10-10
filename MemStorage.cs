@@ -6,7 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace CSharpHPKP {
-    class MemStorage {
+
+    public class MemStorage : IStorage {
 
         private Dictionary<string, Header> domains;
         private Mutex mu;
