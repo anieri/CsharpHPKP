@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,42 +23,42 @@ namespace CSharpHPKP {
             this.storage = storage;
         }
 
-        public void Request(Uri uri, Action<Stream> action) {
+        public delegate void SendRequest(Stream outStream);
+        public delegate void ReadResponse(Stream inStream);
+
+        public void DoRequest(Uri uri, SendRequest sendRequest, ReadResponse readResponse) {
             var host = uri.Host;
             var scheme = uri.Scheme;
 
             if (scheme != "https") {
-                return;
+                throw new Exception("Expected https scheme");
             }
 
             var h = this.storage.Lookup(host);
-            if (h != null) {
-                var request = (HttpWebRequest) WebRequest.Create(uri);
-
-                var certv2 = new X509Certificate2(request.ServicePoint.Certificate);
-                string cn = certv2.Issuer;
-                string cedate = certv2.GetExpirationDateString();
-                string cpub = certv2.GetPublicKeyString();
-
-                bool validPin = false;
-                // FIXME: is this correct? how to get intermidiate certs?
-                var peerPin = HPKP.fingerprint(certv2);
-                if (h.Matches(peerPin)) {
-                    validPin = true;
-                }
-                if (!validPin) {
-                    return;
-                }
-                return;
+            if (h == null) {
+                throw new Exception("Host not found: " + host);
             }
-        }
 
-        public static string fingerprint(X509Certificate2 cert) {
-            Byte[] hashBytes;
-            using (var hasher = new SHA256Managed()) {
-                hashBytes = hasher.ComputeHash(cert.RawData);
+            ServicePoint sp = ServicePointManager.FindServicePoint(uri);
+            WebRequest request = WebRequest.Create(uri);
+            request.Proxy = null;
+            request.Credentials = CredentialCache.DefaultCredentials;
+
+            ServicePointManager.ServerCertificateValidationCallback +=
+                new RemoteCertificateValidationCallback(h.ValidateServerCertificate);
+
+            if (sendRequest != null) {
+                using (var stream = request.GetRequestStream()) {
+                    sendRequest(stream);
+                }
             }
-            return hashBytes.Aggregate(String.Empty, (str, hashByte) => str + hashByte.ToString("x2"));
+
+            HttpWebResponse response = (HttpWebResponse) request.GetResponse();
+            using (Stream dataStream = response.GetResponseStream()) {
+                if (readResponse != null) {
+                    readResponse(dataStream);
+                }
+            }
         }
     }
 }
