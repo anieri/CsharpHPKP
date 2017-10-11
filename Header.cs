@@ -26,7 +26,7 @@ namespace CSharpHPKP {
             return false; ;
         }
 
-        public bool ValidateServerCertificate(
+        internal bool ValidateServerCertificate(
             object sender,
             X509Certificate certificate,
             X509Chain chain,
@@ -52,7 +52,7 @@ namespace CSharpHPKP {
             return hashBytes.Aggregate(String.Empty, (str, hashByte) => str + hashByte.ToString("x2"));
         }
 
-        public static Header ParseHeader(HttpWebResponse resp) {
+        internal static Header ParseHeader(HttpWebResponse resp) {
             if (resp == null) {
                 return null;
             }
@@ -64,7 +64,7 @@ namespace CSharpHPKP {
             return Header.populate(new Header(), pins[0]);
         }
 
-        public static Header Copy(Header h) {
+        internal static Header Copy(Header h) {
             Header r = new Header();
             r.Created = h.Created;
             r.MaxAge = h.MaxAge;

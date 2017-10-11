@@ -17,7 +17,7 @@ namespace CSharpHPKP {
 
     public class HPKP {
 
-        IStorage storage;
+        private IStorage storage;
 
         public HPKP(IStorage storage) {
             this.storage = storage;
