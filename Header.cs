@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,32 @@ namespace CSharpHPKP {
                 }
             }
             return false; ;
+        }
+
+        public bool ValidateServerCertificate(
+            object sender,
+            X509Certificate certificate,
+            X509Chain chain,
+            SslPolicyErrors sslPolicyErrors
+        ) {
+            foreach (var c in chain.ChainElements) {
+                var certParser = new Org.BouncyCastle.X509.X509CertificateParser();
+                var cert = certParser.ReadCertificate(c.Certificate.RawData);
+                var certStruct = cert.CertificateStructure;
+                var peerPin = Header.fingerprint(certStruct);
+                if (this.Matches(peerPin)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static string fingerprint(Org.BouncyCastle.Asn1.X509.X509CertificateStructure certStruct) {
+            Byte[] hashBytes;
+            using (var hasher = new System.Security.Cryptography.SHA256Managed()) {
+                hashBytes = hasher.ComputeHash(certStruct.SubjectPublicKeyInfo.GetDerEncoded());
+            }
+            return hashBytes.Aggregate(String.Empty, (str, hashByte) => str + hashByte.ToString("x2"));
         }
 
         public static Header ParseHeader(HttpWebResponse resp) {
