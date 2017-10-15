@@ -23,7 +23,7 @@ namespace CSharpHPKP {
             this.storage = storage;
         }
 
-        public void DoRequest(Uri uri, Action<Stream> sendRequest, Action<Stream> readResponse) {
+        public T DoRequest<T>(Uri uri, Action<Stream> sendRequest, Func<HttpWebResponse, T> readResponse) {
             var host = uri.Host;
             var scheme = uri.Scheme;
 
@@ -51,11 +51,10 @@ namespace CSharpHPKP {
             }
 
             HttpWebResponse response = (HttpWebResponse) request.GetResponse();
-            using (Stream dataStream = response.GetResponseStream()) {
-                if (readResponse != null) {
-                    readResponse(dataStream);
-                }
+            if (readResponse != null) {
+                return readResponse(response);
             }
+            return default(T);
         }
     }
 }
