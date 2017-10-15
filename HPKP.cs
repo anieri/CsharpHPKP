@@ -23,10 +23,7 @@ namespace CSharpHPKP {
             this.storage = storage;
         }
 
-        public delegate void SendRequest(Stream outStream);
-        public delegate void ReadResponse(Stream inStream);
-
-        public void DoRequest(Uri uri, SendRequest sendRequest, ReadResponse readResponse) {
+        public void DoRequest(Uri uri, Action<Stream> sendRequest, Action<Stream> readResponse) {
             var host = uri.Host;
             var scheme = uri.Scheme;
 
