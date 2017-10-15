@@ -23,7 +23,7 @@ namespace CSharpHPKP {
             this.storage = storage;
         }
 
-        public T DoRequest<T>(Uri uri, Action<Stream> sendRequest, Func<HttpWebResponse, T> readResponse) {
+        public T DoRequest<T>(Uri uri, string method, Action<Stream> sendRequest, Func<HttpWebResponse, T> readResponse) {
             var host = uri.Host;
             var scheme = uri.Scheme;
 
@@ -39,6 +39,7 @@ namespace CSharpHPKP {
             ServicePoint sp = ServicePointManager.FindServicePoint(uri);
             WebRequest request = WebRequest.Create(uri);
             request.Proxy = null;
+            request.Method = method;
             request.Credentials = CredentialCache.DefaultCredentials;
 
             ServicePointManager.ServerCertificateValidationCallback +=
