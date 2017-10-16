@@ -56,9 +56,9 @@ namespace CSharpHPKP {
             }
 
             if (d.MaxAge == 0 && !d.Permanent) {
-                var check = this.domains[host];
-                if (check != null) {
-                    if (!check.Permanent) {
+                Header h;
+                if (this.domains.TryGetValue(host, out h)) {
+                    if (!h.Permanent) {
                         this.domains.Remove(host);
                     }
                 }
