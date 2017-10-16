@@ -18,10 +18,10 @@ namespace CSharpHPKP {
         }
 
         public Header Lookup(string host) {
+            Header d;
             this.mu.WaitOne();
 
-            var d = this.domains[host];
-            if (d != null) {
+            if (this.domains.TryGetValue(host, out d)) {
                 this.mu.ReleaseMutex();
                 return Header.Copy(d);
             }
@@ -31,8 +31,7 @@ namespace CSharpHPKP {
                 var i = host.IndexOf(".");
                 if (i > 0) {
                     host = host.Substring(i + 1);
-                    d = this.domains[host];
-                    if (d != null) {
+                    if (this.domains.TryGetValue(host, out d)) {
                         if (d.IncludeSubDomains) {
                             this.mu.ReleaseMutex();
                             return Header.Copy(d);
