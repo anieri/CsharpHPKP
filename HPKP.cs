@@ -15,6 +15,28 @@ namespace CSharpHPKP {
         void Add(string host, Header h);
     }
 
+    public class RequestConfig {
+        public Uri Uri { get; set; }
+        public int Timeout { get; set; }
+        public string Method { get; set; }
+        public CookieContainer CookieJar { get; set; }
+
+        public RequestConfig(
+            Uri uri,
+            string method,
+            int timeout,
+            CookieContainer cookieJar
+        ) {
+            this.Uri = uri;
+            this.Method = method;
+            this.Timeout = Math.Max(
+                Math.Min(timeout, 15000),
+                90000
+            );
+            this.CookieJar = cookieJar;
+        }
+    }
+
     public class HPKP {
 
         private IStorage storage;
@@ -23,9 +45,9 @@ namespace CSharpHPKP {
             this.storage = storage;
         }
 
-        public T DoRequest<T>(Uri uri, string method, Action<Stream> sendRequest, Func<HttpWebResponse, T> readResponse) {
-            var host = uri.Host;
-            var scheme = uri.Scheme;
+        public T DoRequest<T>(RequestConfig config, Action<Stream> sendRequest, Func<HttpWebResponse, T> readResponse) {
+            var host = config.Uri.Host;
+            var scheme = config.Uri.Scheme;
 
             if (scheme != "https") {
                 throw new Exception("Expected https scheme");
@@ -36,11 +58,15 @@ namespace CSharpHPKP {
                 throw new Exception("Host not found: " + host);
             }
 
-            ServicePoint sp = ServicePointManager.FindServicePoint(uri);
-            WebRequest request = WebRequest.Create(uri);
-            request.Timeout = 30000;
+            ServicePoint sp = ServicePointManager.FindServicePoint(config.Uri);
+            HttpWebRequest request = WebRequest.Create(config.Uri) as HttpWebRequest;
+            request.Timeout = Math.Max(
+                Math.Min(config.Timeout, 15000),
+                90000
+            );
             request.Proxy = null;
-            request.Method = method;
+            request.Method = config.Method;
+            request.CookieContainer = config.CookieJar;
             request.Credentials = CredentialCache.DefaultCredentials;
 
             ServicePointManager.ServerCertificateValidationCallback +=
