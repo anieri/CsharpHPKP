@@ -38,6 +38,7 @@ namespace CSharpHPKP {
 
             ServicePoint sp = ServicePointManager.FindServicePoint(uri);
             WebRequest request = WebRequest.Create(uri);
+            request.Timeout = 30000;
             request.Proxy = null;
             request.Method = method;
             request.Credentials = CredentialCache.DefaultCredentials;

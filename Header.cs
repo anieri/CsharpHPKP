@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 namespace CSharpHPKP {
     public class Header {
 
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(Header));
+
         public Int64 Created;
         public Int64 MaxAge;
         public bool IncludeSubDomains;
@@ -19,7 +21,7 @@ namespace CSharpHPKP {
 
         public bool Matches(string pin) {
             foreach (string p in this.Sha256Pins) {
-                if (p == pin) {
+                if (p.Equals(pin)) {
                     return true; ;
                 }
             }
@@ -32,11 +34,13 @@ namespace CSharpHPKP {
             X509Chain chain,
             SslPolicyErrors sslPolicyErrors
         ) {
+            log.Info("Validating certificate");
             foreach (var c in chain.ChainElements) {
                 var certParser = new Org.BouncyCastle.X509.X509CertificateParser();
                 var cert = certParser.ReadCertificate(c.Certificate.RawData);
                 var certStruct = cert.CertificateStructure;
                 var peerPin = Header.fingerprint(certStruct);
+                log.Info("Peer pin: " + peerPin);
                 if (this.Matches(peerPin)) {
                     return true;
                 }
@@ -49,7 +53,7 @@ namespace CSharpHPKP {
             using (var hasher = new System.Security.Cryptography.SHA256Managed()) {
                 hashBytes = hasher.ComputeHash(certStruct.SubjectPublicKeyInfo.GetDerEncoded());
             }
-            return hashBytes.Aggregate(String.Empty, (str, hashByte) => str + hashByte.ToString("x2"));
+            return Convert.ToBase64String(hashBytes);
         }
 
         internal static Header ParseHeader(HttpWebResponse resp) {
