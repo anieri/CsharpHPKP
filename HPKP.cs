@@ -68,6 +68,7 @@ namespace CSharpHPKP {
             request.Method = config.Method;
             request.CookieContainer = config.CookieJar;
             request.Credentials = CredentialCache.DefaultCredentials;
+            request.Headers.Add("X-Date", DateTime.UtcNow.ToString("yyyyMMddHHmmssffff"));
 
             ServicePointManager.ServerCertificateValidationCallback +=
                 new RemoteCertificateValidationCallback(h.ValidateServerCertificate);
