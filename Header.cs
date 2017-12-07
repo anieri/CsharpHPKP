@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CSharpHPKP {
-    public class Header {
+    internal class Header {
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(Header));
 

@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace CSharpHPKP {
 
-    public interface IStorage {
+    internal interface IStorage {
         Header Lookup(string host);
         void Add(string host, Header h);
     }
 
-    public class RequestConfig {
+    internal class RequestConfig {
         public Uri Uri { get; set; }
         public int Timeout { get; set; }
         public string Method { get; set; }
@@ -37,7 +37,7 @@ namespace CSharpHPKP {
         }
     }
 
-    public class HPKP {
+    internal class HPKP {
 
         private IStorage storage;
 
