@@ -9,26 +9,25 @@ namespace CSharpHPKP {
 
     internal class MemStorage : IStorage {
 
-        private Dictionary<string, Header> domains;
+        private Dictionary<String, Header> domains;
         private Mutex mu;
 
         public MemStorage() {
-            this.domains = new Dictionary<string, Header>();
+            this.domains = new Dictionary<String, Header>();
             this.mu = new Mutex();
         }
 
-        public Header Lookup(string host) {
-            Header d;
+        public Header Lookup(String host) {
             this.mu.WaitOne();
 
-            if (this.domains.TryGetValue(host, out d)) {
+            if (this.domains.TryGetValue(host, out Header d)) {
                 this.mu.ReleaseMutex();
                 return Header.Copy(d);
             }
 
-            var l = host.Length;
+            Int32 l = host.Length;
             while (l > 0) {
-                var i = host.IndexOf(".");
+                Int32 i = host.IndexOf(".");
                 if (i > 0) {
                     host = host.Substring(i + 1);
                     if (this.domains.TryGetValue(host, out d)) {
@@ -47,16 +46,15 @@ namespace CSharpHPKP {
             return null;
         }
 
-        public void Add(string host, Header d) {
+        public void Add(String host, Header d) {
             this.mu.WaitOne();
 
             if (this.domains == null) {
-                this.domains = new Dictionary<string, Header>();
+                this.domains = new Dictionary<String, Header>();
             }
 
             if (d.MaxAge == 0 && !d.Permanent) {
-                Header h;
-                if (this.domains.TryGetValue(host, out h)) {
+                if (this.domains.TryGetValue(host, out Header h)) {
                     if (!h.Permanent) {
                         this.domains.Remove(host);
                     }

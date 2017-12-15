@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CSharpHPKP {
     internal class Header {
@@ -14,28 +11,28 @@ namespace CSharpHPKP {
 
         public Int64 Created;
         public Int64 MaxAge;
-        public bool IncludeSubDomains;
-        public bool Permanent;
-        public List<string> Sha256Pins;
-        public string ReportURI;
+        public Boolean IncludeSubDomains;
+        public Boolean Permanent;
+        public List<String> Sha256Pins;
+        public String ReportURI;
 
-        public bool Matches(string pin) {
-            foreach (string p in this.Sha256Pins) {
+        public Boolean Matches(String pin) {
+            foreach (String p in this.Sha256Pins) {
                 if (p.Equals(pin)) {
-                    return true; ;
+                    return true;
                 }
             }
-            return false; ;
+            return false;
         }
 
-        internal bool ValidateServerCertificate(
-            object sender,
+        internal Boolean ValidateServerCertificate(
+            Object sender,
             X509Certificate certificate,
             X509Chain chain,
             SslPolicyErrors sslPolicyErrors
         ) {
             log.Info("Validating certificate");
-            foreach (var c in chain.ChainElements) {
+            foreach (X509ChainElement c in chain.ChainElements) {
                 var certParser = new Org.BouncyCastle.X509.X509CertificateParser();
                 var cert = certParser.ReadCertificate(c.Certificate.RawData);
                 var certStruct = cert.CertificateStructure;
@@ -48,7 +45,7 @@ namespace CSharpHPKP {
             return false;
         }
 
-        private static string fingerprint(Org.BouncyCastle.Asn1.X509.X509CertificateStructure certStruct) {
+        private static String fingerprint(Org.BouncyCastle.Asn1.X509.X509CertificateStructure certStruct) {
             Byte[] hashBytes;
             using (var hasher = new System.Security.Cryptography.SHA256Managed()) {
                 hashBytes = hasher.ComputeHash(certStruct.SubjectPublicKeyInfo.GetDerEncoded());
@@ -60,12 +57,12 @@ namespace CSharpHPKP {
             if (resp == null) {
                 return null;
             }
-            var pins = resp.Headers.GetValues("Public-Key-Pins");
+            String[] pins = resp.Headers.GetValues("Public-Key-Pins");
             if (pins == null || pins.Length == 0) {
                 return null;
             }
 
-            return Header.populate(new Header(), pins[0]);
+            return Header.Populate(new Header(), pins[0]);
         }
 
         internal static Header Copy(Header h) {
@@ -75,20 +72,20 @@ namespace CSharpHPKP {
             r.IncludeSubDomains = h.IncludeSubDomains;
             r.Permanent = h.Permanent;
             r.ReportURI = h.ReportURI;
-            r.Sha256Pins = new List<string>();
-            foreach (var pin in h.Sha256Pins) {
+            r.Sha256Pins = new List<String>();
+            foreach (String pin in h.Sha256Pins) {
                 r.Sha256Pins.Add(pin);
             }
             return r;
         }
 
-        private static Header populate(Header h, string v) {
-            h.Sha256Pins = new List<string>();
+        private static Header Populate(Header h, String v) {
+            h.Sha256Pins = new List<String>();
 
-            foreach (string f in v.Split(';')) {
-                string field = f.Trim();
+            foreach (String f in v.Split(';')) {
+                String field = f.Trim();
 
-                int i = field.IndexOf("pin-sha256");
+                Int32 i = field.IndexOf("pin-sha256");
                 if (i >= 0) {
                     h.Sha256Pins.Add(field.Substring(i + 12));
                     continue;
@@ -103,7 +100,7 @@ namespace CSharpHPKP {
                 i = field.IndexOf("max-age=");
                 if (i >= 0) {
                     try {
-                        var ma = Int64.Parse(field.Substring(i + 8));
+                        Int64 ma = Int64.Parse(field.Substring(i + 8));
                         h.MaxAge = ma;
                     } catch (Exception) {
                         continue;

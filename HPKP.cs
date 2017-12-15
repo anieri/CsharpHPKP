@@ -11,20 +11,20 @@ using System.Threading.Tasks;
 namespace CSharpHPKP {
 
     internal interface IStorage {
-        Header Lookup(string host);
-        void Add(string host, Header h);
+        Header Lookup(String host);
+        void Add(String host, Header h);
     }
 
     internal class RequestConfig {
         public Uri Uri { get; set; }
-        public int Timeout { get; set; }
-        public string Method { get; set; }
+        public Int32 Timeout { get; set; }
+        public String Method { get; set; }
         public CookieContainer CookieJar { get; set; }
 
         public RequestConfig(
             Uri uri,
-            string method,
-            int timeout,
+            String method,
+            Int32 timeout,
             CookieContainer cookieJar
         ) {
             this.Uri = uri;
@@ -46,14 +46,14 @@ namespace CSharpHPKP {
         }
 
         public T DoRequest<T>(RequestConfig config, Action<Stream> sendRequest, Func<HttpWebResponse, T> readResponse) {
-            var host = config.Uri.Host;
-            var scheme = config.Uri.Scheme;
+            String host = config.Uri.Host;
+            String scheme = config.Uri.Scheme;
 
             if (scheme != "https") {
                 throw new Exception("Expected https scheme");
             }
 
-            var h = this.storage.Lookup(host);
+            Header h = this.storage.Lookup(host);
             if (h == null) {
                 throw new Exception("Host not found: " + host);
             }
@@ -74,7 +74,7 @@ namespace CSharpHPKP {
                 new RemoteCertificateValidationCallback(h.ValidateServerCertificate);
 
             if (sendRequest != null) {
-                using (var stream = request.GetRequestStream()) {
+                using (Stream stream = request.GetRequestStream()) {
                     sendRequest(stream);
                 }
             }
