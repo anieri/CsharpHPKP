@@ -17,23 +17,18 @@ namespace CSharpHPKP {
 
     internal class RequestConfig {
         public Uri Uri { get; set; }
-        public Int32 Timeout { get; set; }
         public String Method { get; set; }
         public CookieContainer CookieJar { get; set; }
-
-        public RequestConfig(
-            Uri uri,
-            String method,
-            Int32 timeout,
-            CookieContainer cookieJar
-        ) {
-            this.Uri = uri;
-            this.Method = method;
-            this.Timeout = Math.Max(
-                Math.Min(timeout, 15000),
-                90000
-            );
-            this.CookieJar = cookieJar;
+        public Int32 Timeout {
+            get {
+                return this.Timeout;
+            }
+            set {
+                this.Timeout = Math.Max(
+                    Math.Min(value, 15000),
+                    90000
+                );
+            }
         }
     }
 
