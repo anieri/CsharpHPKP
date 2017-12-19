@@ -19,12 +19,15 @@ namespace CSharpHPKP {
         public Uri Uri { get; set; }
         public String Method { get; set; }
         public CookieContainer CookieJar { get; set; }
+        public Int64 ContentLength { get; set; }
+
+        private Int32 timeout = 15000;
         public Int32 Timeout {
             get {
-                return this.Timeout;
+                return this.timeout;
             }
             set {
-                this.Timeout = Math.Max(
+                this.timeout = Math.Max(
                     Math.Min(value, 15000),
                     90000
                 );
@@ -64,6 +67,9 @@ namespace CSharpHPKP {
             request.CookieContainer = config.CookieJar;
             request.Credentials = CredentialCache.DefaultCredentials;
             request.Headers.Add("X-Date", DateTime.UtcNow.ToString("yyyyMMddHHmmss.ffff"));
+            if (config.ContentLength > 0) {
+                request.ContentLength = config.ContentLength;
+            }
 
             ServicePointManager.ServerCertificateValidationCallback +=
                 new RemoteCertificateValidationCallback(h.ValidateServerCertificate);
