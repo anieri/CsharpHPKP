@@ -62,7 +62,7 @@ namespace CSharpHPKP {
                 Math.Min(config.Timeout, 15000),
                 90000
             );
-            request.Proxy = null;
+            request.Proxy = WebRequest.GetSystemWebProxy();
             request.Method = config.Method;
             request.CookieContainer = config.CookieJar;
             request.Credentials = CredentialCache.DefaultCredentials;
