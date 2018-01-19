@@ -80,9 +80,10 @@ namespace CSharpHPKP {
                 }
             }
 
-            HttpWebResponse response = (HttpWebResponse) request.GetResponse();
-            if (readResponse != null) {
-                return readResponse(response);
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse()) {
+                if (readResponse != null) {
+                    return readResponse(response);
+                }
             }
             return default(T);
         }
