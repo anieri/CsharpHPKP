@@ -20,6 +20,7 @@ namespace CSharpHPKP {
         public String Method { get; set; }
         public CookieContainer CookieJar { get; set; }
         public Int64 ContentLength { get; set; }
+        public IWebProxy ProxySettings { get; set; }
 
         private Int32 timeout = 15000;
         public Int32 Timeout {
@@ -62,7 +63,7 @@ namespace CSharpHPKP {
                 Math.Min(config.Timeout, 15000),
                 90000
             );
-            request.Proxy = WebRequest.GetSystemWebProxy();
+            request.Proxy = config.ProxySettings;
             request.Method = config.Method;
             request.CookieContainer = config.CookieJar;
             request.Credentials = CredentialCache.DefaultCredentials;
