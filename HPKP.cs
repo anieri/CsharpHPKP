@@ -44,7 +44,7 @@ namespace CSharpHPKP {
             this.storage = storage;
         }
 
-        public T DoRequest<T>(RequestConfig config, Action<Stream> sendRequest, Func<HttpWebResponse, T> readResponse) {
+        public T DoRequest<T>(RequestConfig config, Action<Stream> sendRequest, Func<HttpWebResponse, T> readResponse, Boolean shouldHandleError = false) {
             String host = config.Uri.Host;
             String scheme = config.Uri.Scheme;
 
@@ -59,8 +59,8 @@ namespace CSharpHPKP {
 
             ServicePoint sp = ServicePointManager.FindServicePoint(config.Uri);
             HttpWebRequest request = WebRequest.Create(config.Uri) as HttpWebRequest;
-            request.Timeout = Math.Max(
-                Math.Min(config.Timeout, 15000),
+            request.Timeout = Math.Min(
+                Math.Max(config.Timeout, 15000),
                 90000
             );
             request.Proxy = config.ProxySettings;
@@ -75,17 +75,26 @@ namespace CSharpHPKP {
             ServicePointManager.ServerCertificateValidationCallback +=
                 new RemoteCertificateValidationCallback(h.ValidateServerCertificate);
 
-            if (sendRequest != null) {
-                using (Stream stream = request.GetRequestStream()) {
-                    sendRequest(stream);
+            try {
+                if (sendRequest != null) {
+                    using (Stream stream = request.GetRequestStream()) {
+                        sendRequest(stream);
+                    }
                 }
+
+                using (HttpWebResponse response = (HttpWebResponse) request.GetResponse()) {
+                    if (readResponse != null) {
+                        return readResponse(response);
+                    }
+                }
+
+            } catch (WebException e) {
+                if (!shouldHandleError || e.Response == null || readResponse == null) {
+                    throw e;
+                }
+                return readResponse((HttpWebResponse) e.Response);
             }
 
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse()) {
-                if (readResponse != null) {
-                    return readResponse(response);
-                }
-            }
             return default(T);
         }
     }
