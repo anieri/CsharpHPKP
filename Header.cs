@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Security;
+using System.Runtime.Serialization;
 using System.Security.Cryptography.X509Certificates;
 
 namespace CSharpHPKP {
@@ -32,17 +33,20 @@ namespace CSharpHPKP {
             SslPolicyErrors sslPolicyErrors
         ) {
             log.Info("Validating certificate");
+            List<String> foundPins = new List<String>();
             foreach (X509ChainElement c in chain.ChainElements) {
                 var certParser = new Org.BouncyCastle.X509.X509CertificateParser();
                 var cert = certParser.ReadCertificate(c.Certificate.RawData);
                 var certStruct = cert.CertificateStructure;
                 var peerPin = Header.fingerprint(certStruct);
                 log.Info("Peer pin: " + peerPin);
+
+                foundPins.Add(peerPin);
                 if (this.Matches(peerPin)) {
                     return true;
                 }
             }
-            return false;
+            throw new HPKPNotFoundException(this.Sha256Pins, foundPins);
         }
 
         private static String fingerprint(Org.BouncyCastle.Asn1.X509.X509CertificateStructure certStruct) {
