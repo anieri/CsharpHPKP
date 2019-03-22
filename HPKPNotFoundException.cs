@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using Utf8Json;
 
 namespace CSharpHPKP {
     [Serializable]
@@ -16,7 +15,7 @@ namespace CSharpHPKP {
 
         public override String Message => this.ToString();
 
-        public override String ToString() => JsonSerializer.ToJsonString(new Helper(this.Expected, this.Found));
+        public override String ToString() => JsonConvert.SerializeObject(new Helper(this.Expected, this.Found));
     }
 
     internal class Helper {
