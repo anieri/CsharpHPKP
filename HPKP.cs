@@ -21,6 +21,7 @@ namespace CSharpHPKP {
         public CookieContainer CookieJar { get; set; }
         public Int64 ContentLength { get; set; }
         public IWebProxy ProxySettings { get; set; }
+        public Dictionary<String, String> Headers { get; set; }
 
         private Int32 timeout = 15000;
         public Int32 Timeout {
@@ -67,7 +68,13 @@ namespace CSharpHPKP {
             request.Method = config.Method;
             request.CookieContainer = config.CookieJar;
             request.Credentials = CredentialCache.DefaultCredentials;
-            request.Headers.Add("X-Date", DateTime.UtcNow.ToString("yyyyMMddHHmmss.ffff"));
+            request.Headers.Add("x-date", DateTime.UtcNow.ToString("yyyyMMddHHmmss.ffff"));
+            foreach (KeyValuePair<String, String> header in config.Headers) {
+                if ("x-date" == header.Key?.ToLowerInvariant().Trim()) {
+                    continue;
+                }
+                request.Headers.Add(header.Key, header.Value);
+            }
             if (config.ContentLength > 0) {
                 request.ContentLength = config.ContentLength;
             }
