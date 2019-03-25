@@ -69,11 +69,13 @@ namespace CSharpHPKP {
             request.CookieContainer = config.CookieJar;
             request.Credentials = CredentialCache.DefaultCredentials;
             request.Headers.Add("x-date", DateTime.UtcNow.ToString("yyyyMMddHHmmss.ffff"));
-            foreach (KeyValuePair<String, String> header in config.Headers) {
-                if ("x-date" == header.Key?.ToLowerInvariant().Trim()) {
-                    continue;
+            if (config.Headers != null && config.Headers.Count > 0) {
+                foreach (KeyValuePair<String, String> header in config.Headers) {
+                    if ("x-date" == header.Key?.ToLowerInvariant().Trim()) {
+                        continue;
+                    }
+                    request.Headers.Add(header.Key, header.Value);
                 }
-                request.Headers.Add(header.Key, header.Value);
             }
             if (config.ContentLength > 0) {
                 request.ContentLength = config.ContentLength;
@@ -100,6 +102,9 @@ namespace CSharpHPKP {
                     throw e;
                 }
                 return readResponse((HttpWebResponse) e.Response);
+            } catch (Exception e) {
+                // TODO: check if here was the point of crash-incurring exception
+                throw;
             }
 
             return default(T);
