@@ -39,7 +39,7 @@ namespace CSharpHPKP {
 
     internal class HPKP {
 
-        private IStorage storage;
+        private readonly IStorage storage;
 
         public HPKP(IStorage storage) {
             this.storage = storage;
@@ -59,7 +59,7 @@ namespace CSharpHPKP {
             }
 
             ServicePoint sp = ServicePointManager.FindServicePoint(config.Uri);
-            HttpWebRequest request = WebRequest.Create(config.Uri) as HttpWebRequest;
+            var request = WebRequest.Create(config.Uri) as HttpWebRequest;
             request.Timeout = Math.Min(
                 Math.Max(config.Timeout, 15000),
                 90000
@@ -91,7 +91,7 @@ namespace CSharpHPKP {
                     }
                 }
 
-                using (HttpWebResponse response = (HttpWebResponse) request.GetResponse()) {
+                using (var response = (HttpWebResponse) request.GetResponse()) {
                     if (readResponse != null) {
                         return readResponse(response);
                     }
@@ -102,9 +102,6 @@ namespace CSharpHPKP {
                     throw e;
                 }
                 return readResponse((HttpWebResponse) e.Response);
-            } catch (Exception e) {
-                // TODO: check if here was the point of crash-incurring exception
-                throw;
             }
 
             return default(T);
