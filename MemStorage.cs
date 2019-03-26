@@ -10,7 +10,7 @@ namespace CSharpHPKP {
     internal class MemStorage : IStorage {
 
         private Dictionary<String, Header> domains;
-        private Mutex mu;
+        private readonly Mutex mu;
 
         public MemStorage() {
             this.domains = new Dictionary<String, Header>();
@@ -22,7 +22,7 @@ namespace CSharpHPKP {
 
             if (this.domains.TryGetValue(host, out Header d)) {
                 this.mu.ReleaseMutex();
-                return Header.Copy(d);
+                return new Header(d);
             }
 
             Int32 l = host.Length;
@@ -33,7 +33,7 @@ namespace CSharpHPKP {
                     if (this.domains.TryGetValue(host, out d)) {
                         if (d.IncludeSubDomains) {
                             this.mu.ReleaseMutex();
-                            return Header.Copy(d);
+                            return new Header(d);
                         }
                     }
                     l = host.Length;
