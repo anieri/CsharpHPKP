@@ -31,6 +31,22 @@ namespace CSharpHPKP {
                 );
             }
         }
+
+        public RequestConfig Merge(RequestConfig other) { 
+            if (other == null) {
+                return this;
+            }
+        
+            return new RequestConfig { 
+                Uri = other.Uri ?? this.Uri,
+                Method = other.Method ?? this.Method,
+                CookieJar = other.CookieJar ?? this.CookieJar,
+                ProxySettings = other.ProxySettings ?? this.ProxySettings,
+                Headers = other.Headers ?? this.Headers,
+                ContentLength = (other.ContentLength == 0) ? this.ContentLength : other.ContentLength,
+                Timeout = (other.Timeout == 0 || other.Timeout == 15000) ? this.Timeout : other.Timeout,
+            };
+        }
     }
 
     internal class HPKP {
